@@ -7,8 +7,9 @@
 #include <algorithm>
 #include <string>
 
-#define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
+#include "wav_reader.h"
+
 
 extern "C" {
     #include <kiss_fft.h>
@@ -16,71 +17,41 @@ extern "C" {
 }
 
 int main(int argc, char* argv[]) {
+    // This can be removed
     const int N = 1024;
 
+    // Input vector we end up working with
     std::vector<float> input(N, 0.0f);
 
+    // We end up changing the sample rate but not frequencey, could refactor easily
     float sampleRate = 44100.0f;
-    float frequency = 440.0f;
+    const float frequency = 440.0f;
+    // GET RID OF EVENTUALLY
 
-    if (argc > 1) {
-        std::string filename = argv[1];
 
-        unsigned int channels = 0;
-        unsigned int wavSampleRate = 0;
-        drwav_uint64 totalFrameCount = 0;
+    WavReader reader(
+        argc > 1? argv[1] : ""
+    );
 
-        float* samples = drwav_open_file_and_read_pcm_frames_f32(
-            filename.c_str(),
-            &channels,
-            &wavSampleRate,
-            &totalFrameCount,
-            nullptr
-        );
+    if(!reader.readFrame(input)){
+        reader.createSineWave(input);
 
-        if (!samples) {
-            std::cerr << "Failed to open WAV file: " << filename << "\n";
-            return 1;
-        }
-
-        sampleRate = static_cast<float>(wavSampleRate);
-
-        //Picks the middle of the wav file for our snapshot
-        drwav_uint64 startFrame = totalFrameCount / 2;
-
-        if (startFrame + N > totalFrameCount) {
-            startFrame = totalFrameCount > N ? totalFrameCount - N : 0;
-        }
-
-        for (int i = 0; i < N; ++i) {
-            //Reads through left channel
-            input[i] = samples[(startFrame + i) * channels]; 
-        }
-
-        drwav_free(samples, nullptr);
-
-        std::cout << "Loaded WAV file: " << filename << "\n";
-        std::cout << "Sample rate: " << sampleRate << " Hz\n";
-        std::cout << "Analyzing middle slice\n\n";
-
-    } else {
-        // Fall back case where we use a genereated sine wave
-        for (int i = 0; i < N; ++i) {
-            input[i] = std::sin(2.0f * static_cast<float>(M_PI) * frequency * i / sampleRate);
-        }
-
-        std::cout << "Using generated 440 Hz sine wave.\n\n";
+        std::cout << "Using generated sine wave\n";
+    }
+    else {
+        std::cout << "Loaded wav file\n";
     }
 
     kiss_fftr_cfg cfg = kiss_fftr_alloc(N, 0, nullptr, nullptr);
+
     if (!cfg) {
         std::cerr << "Failed to allocate FFT configuration.\n";
         return 1;
     }
 
+
     std::vector<kiss_fft_cpx> output(N / 2 + 1);
     kiss_fftr(cfg, input.data(), output.data());
-
 
     //Printing to standard output
     for (int i = 0; i < N / 2; i += 8) {
