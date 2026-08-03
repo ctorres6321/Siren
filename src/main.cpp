@@ -1,4 +1,3 @@
-#define _USE_MATH_DEFINES
 
 #include <iostream>
 #include <vector>
@@ -7,26 +6,17 @@
 #include <algorithm>
 #include <string>
 
-#include "dr_wav.h"
 #include "wav_reader.h"
-
-
-extern "C" {
-    #include <kiss_fft.h>
-    #include <kiss_fftr.h>
-}
+#include "fft.h"
 
 int main(int argc, char* argv[]) {
     // This can be removed
     const int N = 1024;
 
-    // Input vector we end up working with
     std::vector<float> input(N, 0.0f);
 
-    // We end up changing the sample rate but not frequencey, could refactor easily
     float sampleRate = 44100.0f;
-    const float frequency = 440.0f;
-    // GET RID OF EVENTUALLY
+    // GET RID OF EVENTUALLY ONCE WE SEPERATE IO LOGIC 
 
 
     WavReader reader(
@@ -42,16 +32,11 @@ int main(int argc, char* argv[]) {
         std::cout << "Loaded wav file\n";
     }
 
-    kiss_fftr_cfg cfg = kiss_fftr_alloc(N, 0, nullptr, nullptr);
 
-    if (!cfg) {
-        std::cerr << "Failed to allocate FFT configuration.\n";
-        return 1;
-    }
+    FFT fft(N);
 
+    auto output = fft.compute(input);
 
-    std::vector<kiss_fft_cpx> output(N / 2 + 1);
-    kiss_fftr(cfg, input.data(), output.data());
 
     //Printing to standard output
     for (int i = 0; i < N / 2; i += 8) {
@@ -77,6 +62,5 @@ int main(int argc, char* argv[]) {
     std::cout << "\nPress Enter to exit...";
     std::cin.get();
 
-    free(cfg);
     return 0;
 }

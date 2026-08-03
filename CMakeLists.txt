@@ -9,11 +9,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Library
 add_library(audio_lib
     src/wav_reader.cpp
+    src/fft.cpp
+    include/wav_reader.h
+    include/fft.h
 )
 
 target_include_directories(audio_lib PUBLIC
     ${PROJECT_SOURCE_DIR}/external
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/kissfft
 )
 
 
