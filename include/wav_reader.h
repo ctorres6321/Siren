@@ -23,10 +23,11 @@ class WavReader {
         // We use these as a fallback case if IO was unable to open an input file
         // In that case we generate a sine wave using these variables
 
-        unsigned int channels_;
-        unsigned int sample_rate_;
+        unsigned int channels_ = 1;
+        unsigned int sample_rate_ = 44100;
 
-        const float defaultSampleRate = 44100.0f;
-        const float frequency = 440.0f;
-        const int N = 1024;
+        static constexpr float defaultSampleRate = 44100.0f;
+        static constexpr float frequency = 440.0f;
+        static constexpr int N = 1024;
+
 };

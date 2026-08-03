@@ -7,6 +7,10 @@
 #include <stdexcept>
 
 WavReader::WavReader(const std::string& path){
+    if(path.empty()){
+        return;
+    }
+
     if(!drwav_init_file(
         &wav_,
         path.c_str(),
@@ -16,8 +20,10 @@ WavReader::WavReader(const std::string& path){
             "Failed to open wav file"
         );
     }
+ 
     channels_ = wav_.channels;
     sample_rate_ = wav_.sampleRate;
+
 }
 
 // If readFrame returns false then we fill in the input buffer with a generated sine wave and return it

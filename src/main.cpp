@@ -8,20 +8,23 @@
 
 #include "wav_reader.h"
 #include "fft.h"
+#include "visualizer.h"
 
 int main(int argc, char* argv[]) {
-    // This can be removed
+    // N represents the numbers of samples processed per FFT window
+
     const int N = 1024;
 
-    std::vector<float> input(N, 0.0f);
-
-    float sampleRate = 44100.0f;
-    // GET RID OF EVENTUALLY ONCE WE SEPERATE IO LOGIC 
-
-
+    /*
+        Attempt to read the wav file with WavReader, if no arguement is 
+        passed in then we fall back and generate the sine wave and read from there.
+    */
+    
     WavReader reader(
         argc > 1? argv[1] : ""
     );
+
+    std::vector<float> input(N, 0.0f);
 
     if(!reader.readFrame(input)){
         reader.createSineWave(input);
@@ -32,32 +35,26 @@ int main(int argc, char* argv[]) {
         std::cout << "Loaded wav file\n";
     }
 
+    /*
+        Attempt to then transform the read in wav file with 
+        KissFFT and with the amount of samples passed into our wrapper class.
+    */
 
     FFT fft(N);
 
-    auto output = fft.compute(input);
+    auto spectrum = fft.compute(input);
 
 
-    //Printing to standard output
-    for (int i = 0; i < N / 2; i += 8) {
-        float magnitude = std::sqrt(output[i].r * output[i].r +
-                                    output[i].i * output[i].i);
+    /*
+        Output the results of the conversion to the terminal.
+    */
 
-        float freq = i * sampleRate / N;
-        float scaled = std::log10(1.0f + magnitude);
+    Visualizer visualizer(N);
 
-        int barLength = static_cast<int>(scaled * 8);
-        barLength = std::clamp(barLength, 0, 40);
-
-        std::cout << std::setw(8) << std::fixed << std::setprecision(1)
-                  << freq << " Hz | ";
-
-        for (int j = 0; j < barLength; ++j) {
-            std::cout << "#";
-        }
-
-        std::cout << '\n';
-    }
+    visualizer.render(
+        spectrum, 
+        reader.sampleRate()
+    );
 
     std::cout << "\nPress Enter to exit...";
     std::cin.get();

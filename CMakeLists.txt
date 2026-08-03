@@ -10,8 +10,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_library(audio_lib
     src/wav_reader.cpp
     src/fft.cpp
+    src/visualizer.cpp
     include/wav_reader.h
     include/fft.h
+    include/visualizer.h
 )
 
 target_include_directories(audio_lib PUBLIC
