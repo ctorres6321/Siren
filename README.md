@@ -1,4 +1,4 @@
-# audio-spectrum-analyzer
+# Siren
 
 A simple C++ command-line audio spectrum analyzer using Fast Fourier Transforms to display the frequency  content of the audio signal.
 
