@@ -32,7 +32,7 @@ Visualizer::Visualizer(size_t fftSize, int width, int height, int numBars)
         throw std::runtime_error(std::string("SDL video init failed: ") + SDL_GetError());
     }
  
-    window_ = SDL_CreateWindow("FFT Visualizer", SDL_WINDOWPOS_CENTERED,
+    window_ = SDL_CreateWindow("Siren", SDL_WINDOWPOS_CENTERED,
                                SDL_WINDOWPOS_CENTERED, width_, height_, SDL_WINDOW_SHOWN);
     if (!window_) {
         throw std::runtime_error(std::string("SDL_CreateWindow failed: ") + SDL_GetError());
