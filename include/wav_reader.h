@@ -1,33 +1,31 @@
 #pragma once
-
-#include <vector>
 #include <string>
+#include <vector>
 #include "dr_wav.h"
-/**
- * @brief Handles the use of reading .wav files and ensuring that the .wav file was record correctly.
- * It also handles the case of generating a sine wave if no .wav file was provided as input to the command line.
- */
+
 class WavReader {
-    public:
-        explicit WavReader(const std::string& path);
-        
-        bool readFrame(std::vector<float>& buffer);
+public:
+    explicit WavReader(const std::string& path);
+    ~WavReader();
 
-        float sampleRate() const;
+    WavReader(const WavReader&) = delete;
+    WavReader& operator=(const WavReader&) = delete;
 
-        void createSineWave(std::vector<float>& buffer);
+    bool readFrame(std::vector<float>& mono);
+    const std::vector<float>& interleaved() const { return interleaved_; }
 
-    private:
-        drwav wav_;
+    bool isGenerated() const { return !loaded_; }
+    float sampleRate() const { return static_cast<float>(sample_rate_); }
+    unsigned channels() const { return channels_; }
 
-        // We use these as a fallback case if IO was unable to open an input file
-        // In that case we generate a sine wave using these variables
+private:
+    drwav wav_{};
+    bool loaded_ = false;
+    unsigned channels_ = 1;
+    unsigned sample_rate_ = 44100;
 
-        unsigned int channels_ = 1;
-        unsigned int sample_rate_ = 44100;
+    float frequency_ = 440.0f;
+    double phase_ = 0.0;
 
-        static constexpr float defaultSampleRate = 44100.0f;
-        static constexpr float frequency = 440.0f;
-        static constexpr int N = 1024;
-
+    std::vector<float> interleaved_;
 };
